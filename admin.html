@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ניהול – שאלון הולנד</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Heebo', sans-serif; background: #f4f6fa; color: #222; margin: 0; padding: 24px 16px; }
+  .wrap { max-width: 1200px; margin: 0 auto; }
+  h1 { color: #2c4a6e; margin: 0 0 16px; }
+  .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.08); padding: 20px; margin-bottom: 16px; }
+  input { font: inherit; padding: 8px 12px; border: 1px solid #ccd; border-radius: 8px; width: 220px; }
+  button { font: inherit; padding: 8px 16px; border: 0; border-radius: 8px; background: #2c4a6e; color: #fff; cursor: pointer; margin-inline-start: 8px; }
+  button.alt { background: #4a9a5c; }
+  table { width: 100%; border-collapse: collapse; font-size: .92em; }
+  th, td { padding: 8px 6px; border-bottom: 1px solid #e5e8ee; text-align: center; }
+  th { background: #eef2f8; color: #2c4a6e; }
+  td.l { text-align: right; }
+  tr.row { cursor: pointer; } tr.row:hover { background: #f7f9fc; }
+  .detail { display: none; background: #fafbfd; text-align: right; }
+  .detail.show { display: table-row; }
+  .detail ul { margin: 4px 0 10px; padding-inline-start: 20px; columns: 2; }
+  #msg { color: #b33; margin-inline-start: 12px; }
+  .overflow { overflow-x: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>תוצאות שאלון נטיות מקצועיות</h1>
+  <div class="card">
+    <input id="pw" type="password" placeholder="סיסמת מנהל">
+    <button onclick="load()">טען</button>
+    <button class="alt" onclick="exportCsv()">ייצוא CSV</button>
+    <span id="msg"></span>
+  </div>
+  <div class="card overflow"><table id="tbl"></table></div>
+</div>
+<script>
+const SB_URL = 'https://ahomwnlimuxinttwrikr.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFob213bmxpbXV4aW50dHdyaWtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NjI5MTUsImV4cCI6MjA4OTIzODkxNX0.B5y9pilGpPM2xxkC30nZfJhUKOPFI8ELSZjbYF5HNeM';
+const CATS = ['R', 'I', 'A', 'S', 'E', 'C'];
+const SECS = { activities: 'פעילויות', skills: 'כשרים', occupations: 'מקצועות' };
+let rows = [];
+
+try { document.getElementById('pw').value = sessionStorage.getItem('holland_pw') || ''; } catch (e) {}
+
+const esc = v => String(v ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const code = s => CATS.map(c => [c, s?.[c] || 0]).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]).join('');
+
+async function load() {
+  const pw = document.getElementById('pw').value;
+  const msg = document.getElementById('msg');
+  msg.textContent = 'טוען...';
+  const r = await fetch(SB_URL + '/rest/v1/rpc/holland_admin_list', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY },
+    body: JSON.stringify({ p_secret: pw })
+  });
+  if (!r.ok) { msg.textContent = 'סיסמה שגויה או שגיאה'; return; }
+  try { sessionStorage.setItem('holland_pw', pw); } catch (e) {}
+  rows = await r.json();
+  msg.textContent = rows.length + ' רשומות';
+  render();
+}
+
+function render() {
+  let h = '<tr><th>#</th><th>נשלח</th><th>שם</th><th>ת.ז.</th><th>תאריך לידה</th><th>תאריך בחינה</th>' +
+    CATS.map(c => `<th>${c}</th>`).join('') + '<th>קוד</th></tr>';
+  rows.forEach((r, i) => {
+    h += `<tr class="row" onclick="document.getElementById('d${i}').classList.toggle('show')"><td>${r.id}</td>` +
+      `<td>${new Date(r.created_at).toLocaleString('he-IL')}</td><td class="l">${esc(r.name)}</td><td>${esc(r.id_number)}</td>` +
+      `<td>${esc(r.date_of_birth)}</td><td>${esc(r.exam_date)}</td>` +
+      CATS.map(c => `<td>${r.scores?.[c] ?? ''}</td>`).join('') + `<td><strong>${code(r.scores)}</strong></td></tr>`;
+    let d = '';
+    CATS.forEach(c => {
+      const pos = Object.keys(SECS).flatMap(k => r.positive_answers?.[c]?.[k] || []);
+      const sec = Object.entries(SECS).map(([k, n]) => `${n}: ${r.section_scores?.[c]?.[k] ?? 0}`).join(' · ');
+      d += `<div><strong>${c}</strong> (${sec}) — כן:</div><ul>${pos.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
+    });
+    h += `<tr class="detail" id="d${i}"><td colspan="${7 + CATS.length}">${d}</td></tr>`;
+  });
+  document.getElementById('tbl').innerHTML = h;
+}
+
+function exportCsv() {
+  if (!rows.length) { document.getElementById('msg').textContent = 'טען נתונים קודם'; return; }
+  const head = ['id', 'created_at', 'name', 'id_number', 'date_of_birth', 'exam_date',
+    ...CATS, ...CATS.flatMap(c => Object.keys(SECS).map(k => `${c}_${k}`)), 'code', 'answers_json'];
+  const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const lines = [head.join(',')];
+  rows.forEach(r => lines.push([r.id, r.created_at, r.name, r.id_number, r.date_of_birth, r.exam_date,
+    ...CATS.map(c => r.scores?.[c] ?? ''),
+    ...CATS.flatMap(c => Object.keys(SECS).map(k => r.section_scores?.[c]?.[k] ?? '')),
+    code(r.scores), JSON.stringify(r.answers || {})].map(q).join(',')));
+  const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'holland_results.csv';
+  a.click();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=6fd058cd-b3c1-455b-814a-fb22992f2542
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>שאלון נטיות מקצועיות – הולנד</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root {
+  --primary: #1a5276;
+  --primary-light: #2980b9;
+  --primary-dark: #0e2f44;
+  --accent: #e67e22;
+  --accent-light: #f39c12;
+  --bg: #f5f7fa;
+  --card: #ffffff;
+  --text: #2c3e50;
+  --text-light: #7f8c8d;
+  --success: #27ae60;
+  --danger: #e74c3c;
+  --border: #dce1e8;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+  --radius: 12px;
+  --R-color: #e74c3c;
+  --I-color: #3498db;
+  --A-color: #9b59b6;
+  --S-color: #27ae60;
+  --E-color: #e67e22;
+  --C-color: #1abc9c;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Heebo', 'Rubik', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Admin Bar */
+.admin-bar {
+  background: var(--primary-dark);
+  color: white;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  flex-wrap: wrap;
+}
+.admin-bar label { font-weight: 500; color: #aed6f1; }
+.admin-bar input[type="email"] {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  width: 280px;
+  direction: ltr;
+  text-align: left;
+}
+.admin-bar input[type="email"]::placeholder { color: rgba(255,255,255,0.5); }
+.admin-bar input[type="email"]:focus { outline: none; border-color: var(--accent); background: rgba(255,255,255,0.25); }
+.admin-bar-note { font-size: 12px; color: #aed6f1; opacity: 0.8; }
+.admin-toggle {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+}
+.admin-toggle:hover { background: rgba(255,255,255,0.25); }
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  text-align: center;
+  padding: 48px 24px 40px;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+.header h1 {
+  font-size: 2.4em;
+  font-weight: 800;
+  margin-bottom: 8px;
+  position: relative;
+}
+.header p {
+  font-size: 1.1em;
+  opacity: 0.85;
+  font-weight: 300;
+  position: relative;
+}
+
+/* Container */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+/* User Info */
+.user-info-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  box-shadow: var(--shadow);
+  margin-bottom: 28px;
+  border: 1px solid var(--border);
+}
+.user-info-card h3 {
+  font-size: 1.2em;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--primary);
+}
+.user-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.user-fields .field { display: flex; flex-direction: column; gap: 4px; }
+.user-fields label { font-size: 14px; font-weight: 500; color: var(--text-light); }
+.user-fields input, .user-fields select {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 15px;
+  transition: border-color 0.2s;
+}
+.user-fields input:focus, .user-fields select:focus { outline: none; border-color: var(--primary-light); }
+
+/* Section */
+.section {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  box-shadow: var(--shadow);
+  margin-bottom: 28px;
+  border: 1px solid var(--border);
+}
+.section-title {
+  font-size: 1.4em;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-title .badge {
+  background: var(--primary);
+  color: white;
+  font-size: 0.55em;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+.section-desc {
+  color: var(--text-light);
+  font-size: 0.95em;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Category pair */
+.category-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+.category-block {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.category-header {
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 0.95em;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.category-header .count { font-weight: 400; font-size: 0.85em; opacity: 0.9; }
+.cat-R .category-header { background: var(--R-color); }
+.cat-I .category-header { background: var(--I-color); }
+.cat-A .category-header { background: var(--A-color); }
+.cat-S .category-header { background: var(--S-color); }
+.cat-E .category-header { background: var(--E-color); }
+.cat-C .category-header { background: var(--C-color); }
+
+.question-list { padding: 0; }
+.question-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 12px;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+.question-item:last-child { border-bottom: none; }
+.question-item:hover { background: #f8f9fa; }
+.question-item.selected { background: #eaf7ed; }
+.question-item.not-selected { background: #fef5f5; }
+
+.q-toggle {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.q-toggle button {
+  width: 36px;
+  height: 30px;
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+.q-toggle button.yes-btn.active { background: var(--success); color: white; border-color: var(--success); }
+.q-toggle button.no-btn.active { background: var(--danger); color: white; border-color: var(--danger); }
+.q-toggle button:hover:not(.active) { background: #f0f0f0; }
+
+.q-text { font-size: 0.9em; flex: 1; }
+
+/* Progress */
+.progress-bar-container {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 28px;
+  border: 1px solid var(--border);
+  position: sticky;
+  top: 44px;
+  z-index: 999;
+}
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-light);
+  margin-bottom: 6px;
+}
+.progress-track {
+  height: 8px;
+  background: #e8e8e8;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-light), var(--accent));
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+
+/* Submit */
+.submit-section { text-align: center; padding: 20px 0 40px; }
+.submit-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  color: white;
+  border: none;
+  padding: 16px 48px;
+  font-size: 1.2em;
+  font-weight: 700;
+  font-family: inherit;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4);
+  transition: all 0.3s;
+}
+.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(230, 126, 34, 0.5); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* Results */
+.results-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  z-index: 2000;
+  overflow-y: auto;
+  padding: 20px;
+}
+.results-overlay.show { display: flex; justify-content: center; align-items: flex-start; }
+.results-panel {
+  background: white;
+  border-radius: 16px;
+  max-width: 850px;
+  width: 100%;
+  margin: 20px auto;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+.results-header {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  padding: 28px 32px;
+  text-align: center;
+}
+.results-header h2 { font-size: 1.8em; font-weight: 800; }
+.results-header p { opacity: 0.8; margin-top: 4px; }
+.results-body { padding: 32px; }
+
+/* Results Table */
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 28px;
+  font-size: 0.9em;
+}
+.results-table th {
+  background: var(--primary);
+  color: white;
+  padding: 10px 8px;
+  font-weight: 600;
+  text-align: center;
+}
+.results-table td {
+  padding: 8px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+.results-table tr:hover { background: #f8f9fa; }
+.results-table .row-label { text-align: right; font-weight: 600; color: var(--primary); }
+.results-table .total-row { font-weight: 700; background: #f0f4f8; }
+
+/* Chart */
+.chart-container {
+  margin: 24px 0;
+  background: #fafbfc;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--border);
+}
+#resultsChart { max-height: 300px; }
+
+/* Positive/Negative Lists */
+.answer-lists {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 24px;
+}
+.answer-list-block {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.answer-list-block h4 {
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 0.95em;
+  color: white;
+}
+.answer-list-block.positive h4 { background: var(--success); }
+.answer-list-block.negative h4 { background: var(--danger); }
+.answer-list-content {
+  padding: 12px 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.answer-list-content .cat-group { margin-bottom: 10px; }
+.answer-list-content .cat-label {
+  font-weight: 700;
+  font-size: 0.85em;
+  margin-bottom: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+.answer-list-content ul {
+  list-style: none;
+  padding-right: 12px;
+  font-size: 0.82em;
+  color: var(--text);
+}
+.answer-list-content li { padding: 2px 0; }
+.answer-list-content li::before { content: '• '; color: var(--text-light); }
+
+/* Results Actions */
+.results-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 20px 32px 28px;
+  flex-wrap: wrap;
+}
+.results-actions button {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-send { background: var(--success); color: white; }
+.btn-send:hover { background: #219a52; }
+.btn-print { background: var(--primary-light); color: white; }
+.btn-print:hover { background: var(--primary); }
+.btn-close-results { background: #ecf0f1; color: var(--text); }
+.btn-close-results:hover { background: #ddd; }
+
+/* Sending status */
+.send-status {
+  text-align: center;
+  padding: 10px;
+  font-weight: 500;
+  font-size: 0.9em;
+  display: none;
+}
+.send-status.success { color: var(--success); display: block; }
+.send-status.error { color: var(--danger); display: block; }
+.send-status.loading { color: var(--text-light); display: block; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .category-pair { grid-template-columns: 1fr; }
+  .answer-lists { grid-template-columns: 1fr; }
+  .user-fields { grid-template-columns: 1fr; }
+  .header h1 { font-size: 1.8em; }
+  .section { padding: 20px 16px; }
+  .admin-bar { flex-direction: column; align-items: stretch; text-align: center; }
+  .admin-bar input[type="email"] { width: 100%; }
+}
+
+@media print {
+  .admin-bar, .progress-bar-container, .submit-section, .results-actions, .btn-close-results { display: none !important; }
+  .results-overlay { position: static; background: none; padding: 0; display: block !important; }
+  .results-panel { box-shadow: none; margin: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <h1>שאלון נטיות מקצועיות</h1>
+  <p>מבוסס על שאלון SDS-R של הולנד, 1994</p>
+</div>
+
+<div class="container">
+
+  <!-- Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-label">
+      <span id="progressText">0 מתוך 198 שאלות</span>
+      <span id="progressPercent">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <!-- User Info -->
+  <div class="user-info-card">
+    <h3>פרטי הנבדק/ת</h3>
+    <div class="user-fields">
+      <div class="field">
+        <label>שם מלא</label>
+        <input type="text" id="userName" placeholder="הכנס שם מלא">
+      </div>
+      <div class="field">
+        <label>תעודת זהות</label>
+        <input type="text" id="userId" placeholder="מספר ת.ז." maxlength="9">
+      </div>
+      <div class="field">
+        <label>תאריך לידה</label>
+        <input type="date" id="userDob">
+      </div>
+      <div class="field">
+        <label>תאריך בחינה</label>
+        <input type="date" id="examDate">
+      </div>
+    </div>
+  </div>
+
+  <!-- Questionnaire Sections built by JS -->
+  <div id="questionnaireSections"></div>
+
+  <!-- Submit -->
+  <div class="submit-section">
+    <button class="submit-btn" id="submitBtn" onclick="showResults()">הצג תוצאות</button>
+  </div>
+</div>
+
+<!-- Results Overlay -->
+<div class="results-overlay" id="resultsOverlay">
+  <div class="results-panel" id="resultsPanel">
+    <div class="results-header">
+      <h2>דוח תוצאות – נטיות מקצועיות</h2>
+      <p id="resultsUserInfo"></p>
+    </div>
+    <div class="results-body" id="resultsBody">
+      <!-- Scores Table -->
+      <h3 style="font-size:1.1em; margin-bottom:12px; color:var(--primary);">טבלת ציונים</h3>
+      <table class="results-table" id="scoresTable"></table>
+
+      <!-- Chart -->
+      <div class="chart-container">
+        <canvas id="resultsChart"></canvas>
+      </div>
+
+      <!-- Answer Lists -->
+      <h3 style="font-size:1.1em; margin-bottom:12px; margin-top:24px; color:var(--primary);">פירוט תשובות</h3>
+      <div class="answer-lists" id="answerLists"></div>
+    </div>
+    <div class="send-status" id="sendStatus"></div>
+    <div class="results-actions">
+      <button class="btn-send" onclick="sendEmail()">שלח תוצאות</button>
+      <button class="btn-print" onclick="window.print()">הדפס דוח</button>
+      <button class="btn-close-results" onclick="closeResults()">חזרה לשאלון</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== CONFIG ====================
+
+// ==================== DATA ====================
+const CATEGORIES = {
+  R: { name: 'ביצועי', code: 'R', color: '#e74c3c' },
+  I: { name: 'חקרני', code: 'I', color: '#3498db' },
+  A: { name: 'אומנותי', code: 'A', color: '#9b59b6' },
+  S: { name: 'חברתי', code: 'S', color: '#27ae60' },
+  E: { name: 'יזמי', code: 'E', color: '#e67e22' },
+  C: { name: 'מנהלי', code: 'C', color: '#1abc9c' }
+};
+
+// All questions organized by section and category
+const QUESTIONS = {
+  activities: {
+    title: 'פעילויות',
+    desc: 'סמן "כן" ליד פעילויות שהיית נהנה/נהנית לעשות. סמן "לא" ליד פעילויות שלא היית נהנה/נהנית לעשות או שאין לך עניין מיוחד בהן.',
+    pairs: [
+      {
+        left: { cat: 'R', items: [
+          'לתקן מכשירי חשמל ביתיים',
+          'לטפל במכונית',
+          'לתקן כלים מכאניים',
+          'לבנות דגמים',
+          'להשתתף בקורס לשרטוט מכאני',
+          'לעבוד בסדנת נגרות',
+          'להשתמש בכלי עבודה עדינים',
+          'לעבוד בגינה',
+          'להפעיל מחשב',
+          'לעבוד עם מתכת עדינה',
+          'להפעיל ציוד ממונע'
+        ]},
+        right: { cat: 'S', items: [
+          'להשתתף בכנסים בנושאי חברה וחינוך',
+          'לסייע לאנשים עם מוגבלויות',
+          'לעסוק בפעילות התנדבותית בקהילה',
+          'לסייע לאחרים בבעיותיהם האישיות',
+          'לחנוך ילד חריג',
+          'לקרוא מאמרים וספרים בפסיכולוגיה',
+          'להשתתף בקורס ביחסי אנוש',
+          'ללמד בבית ספר תיכון',
+          'להנחות פעילויות לעולים חדשים',
+          'ללמד מבוגרים',
+          'לעבוד עם ילדים או עם נוער'
+        ]}
+      },
+      {
+        left: { cat: 'I', items: [
+          'לקרוא כתבי עת מדעיים',
+          'לעבוד במעבדה או במכון מחקר',
+          'ללמוד נושא מדעי תיאורטי',
+          'ליישם מתמטיקה בפתרון בעיות מעשיות',
+          'לעבוד עם חומרים כימיים',
+          'להשתתף בקורס לביולוגיה',
+          'ללמוד על התפרצויות הר געש',
+          'להשתתף בקורס לשיטות מחקר',
+          'להשתתף בביצוע ניסוי מדעי',
+          'להשתתף בצוות של מחקר רפואי',
+          'להשתתף במחקר אקולוגי'
+        ]},
+        right: { cat: 'E', items: [
+          'להשתתף בקורס ליזמות עסקית',
+          'לנהל שירות או עסק עצמאי',
+          'להשתתף בכנס מכירות',
+          'להשתתף בסדנא לניהול או למנהיגות',
+          'לארגן מפגש עם אנשים ידועים בתחומם',
+          'לפקח על עבודת אחרים',
+          'להשתתף בישיבות מנהלים',
+          'להוביל צוות לקראת השגת מטרה',
+          'להיות מעורב במסע בחירות',
+          'להציע הצעות ייעול בתכנון פעילויות',
+          'לקרוא מאמרים או שבועונים עסקיים'
+        ]}
+      },
+      {
+        left: { cat: 'A', items: [
+          'לצייר או לאייר',
+          'לתכנן ולעצב כרזות',
+          'לעצב ביגוד או תפאורות',
+          'לנגן בכלי נגינה',
+          'להלחין מוסיקה',
+          'לכתוב ספרים או מחזות',
+          'להשתתף בחוג לאמנות',
+          'לעסוק בצילום',
+          'לעצב תכשיטים',
+          'להופיע בהצגה',
+          'לקרוא מאמרים על אמנות, ספרים או מוסיקה'
+        ]},
+        right: { cat: 'C', items: [
+          'לבצע פעולות חשבון פשוטות בעסקים ובהנה"ו',
+          'ללמוד להדפיס הדפסה עיוורת',
+          'ללמוד תוכנה חדשה לעיבוד נתונים',
+          'לבצע מעקב מפורט אחר הוצאות והכנסות',
+          'לכתוב מכתבים רשמיים',
+          'להשתתף בקורס חשבונאות',
+          'לערוך רשימת מלאי של מצרכים',
+          'להשתתף בהשתלמות בנושא מיסוי',
+          'לבדוק פגמים בטיב מוצרים',
+          'לבדוק טעויות בחשבון בקופה או בבנק',
+          'לקטלג מסמכים לפי נושאים'
+        ]}
+      }
+    ]
+  },
+  skills: {
+    title: 'כשרים',
+    desc: 'סמן "כן" ליד פעילויות שהינך מסוגל/ת לבצע היטב. סמן "לא" ליד פעילויות שמעולם לא ביצעת או שביצעת ללא הצלחה רבה.',
+    pairs: [
+      {
+        left: { cat: 'R', items: [
+          'אני יכול/ה להשתמש בכלי עבודה (מסור, מברג)',
+          'אני יכול/ה להרכיב חפצים שונים לפי תרשים',
+          'אני יכול/ה להחליף צמיג במכונית',
+          'אני יכול/ה להשתמש במקדחה חשמלית',
+          'אני יכול/ה לעבוד בגינון',
+          'אני יכול/ה לבצע תיקוני חשמל פשוטים',
+          'אני יכול/ה לתקן רהיטים',
+          'אני יכול/ה לצפות מוצרי עץ בפוליטורה (לקה)',
+          'אני יכול/ה לבצע תיקוני שרברבות בסיסיים',
+          'אני יכול/ה לפרק ולהרכיב מכשירים שונים',
+          'אני יכול/ה לצבוע את חדרי הבית'
+        ]},
+        right: { cat: 'S', items: [
+          'קל לי ליצור קשר עם סוגים שונים של אנשים',
+          'אני מצליח/ה להסביר היטב דברים לאחרים',
+          'אני יכול/ה להדריך פעילויות במתנ"ס',
+          'אנשים רבים משתפים אותי בבעיותיהם האישיות',
+          'אני יכול/ה ללמד ילדים בקלות',
+          'אני יכול/ה ללמד מבוגרים בקלות',
+          'אני מסוגל/ת לעזור בפתרון קונפליקטים בינאישיים',
+          'יש לי הבנה טובה של יחסי אנוש',
+          'אני יכול/ה להיות מדריך בקבוצה',
+          'אני יודע/ת איך לגרום לאנשים לחוש בנוח',
+          'בפעילויות חברתיות אני משתף פעולה עם אחרים'
+        ]}
+      },
+      {
+        left: { cat: 'I', items: [
+          'אני יכול/ה להשתמש באלגברה לפתרון בעיות',
+          'אני יכול/ה לבצע סקר או ניסוי במעבדה',
+          'אני יכול/ה לתכנן מחקר',
+          'אני מבין/ה מדדים סטטיסטים בסיסיים',
+          'אני יכול/ה לנתח טיעון לוגי',
+          'אני מבין/ה את תפקידם של תאי דם לבנים',
+          'אני יכול/ה לפענח נוסחאות כימיות פשוטות',
+          'אני מבין/ה מדוע לוויינים אינם נופלים ארצה',
+          'אני יכול/ה לכתוב דוח מדעי',
+          'אני מבין/ה את הרקע לתופעת הגאות והשפל',
+          'אני מבין/ה את תפקיד הדי.אנ.אי. בגנטיקה'
+        ]},
+        right: { cat: 'E', items: [
+          'אני יכול/ה לקבל החלטות בתנאי לחץ',
+          'אני יכול/ה לנהל מסע פרסום',
+          'אני יכול/ה לארגן עבודתם של אחרים',
+          'אני יכול/ה לשמש כמנהג/ה',
+          'אני אדם שאפתן והחלטי',
+          'אני יכול/ה לשכנע אנשים לפעול לפי דרכי',
+          'אני יכול/ה לשמש כאיש/אשת מכירות',
+          'אני יכול/ה לגייס כספים למימוש פרויקט',
+          'אני טוב/ה בניהול משא ומתן',
+          'אני יכול/ה ליזום פעילות שתעניין אנשים',
+          'אני יכול/ה לנהל אסיפה'
+        ]}
+      },
+      {
+        left: { cat: 'A', items: [
+          'אני יכול/ה לנגן ולקרוא תווים',
+          'אני יכול/ה לשיר במקהלה של שני קולות ויותר',
+          'אני יכול/ה לצייר ולצבוע בצבעי מים',
+          'אני יכול/ה לשחק בהצגה',
+          'אני יכול/ה לפרש יצירה ספרותית',
+          'אני יכול/ה לפסל עם חומרים שונים',
+          'אני יכול/ה להלחין מוסיקה לשירים',
+          'אני יכול/ה לעצב בגדים, כרזות או ריהוט',
+          'אני יכול/ה לכתוב סיפורים או שירה',
+          'אני יכול/ה לכתוב כתבה לעיתון',
+          'אני יכול/ה לצלם צילום אומנותי'
+        ]},
+        right: { cat: 'C', items: [
+          'אני יכול/ה לתכנן לוח זמנים לפעילות מורכבת',
+          'אני יכול/ה לתאם פגישה בין גורמים שונים',
+          'אני יכול/ה להשתמש במחשב לארגון נתונים',
+          'אני יכול/ה לבצע עבודת ניירת רבה ביעילות',
+          'אני יכול/ה להשתמש במעבד תמלילים ביעילות',
+          'אני יכול/ה לתמצת פרוטוקול של דיון',
+          'אני יכול/ה לבצע מעקב מדויק אחר תשלומים',
+          'אני יכול/ה לסווג ולארגן מסמכים בצורה יעילה',
+          'אני יכול/ה לכתוב מכתבים עסקיים',
+          'אני יכול/ה לבצע הגהה מדויקת למסמך',
+          'אני יכול/ה לפעול באורח זהיר ומסודר'
+        ]}
+      }
+    ]
+  },
+  occupations: {
+    title: 'מקצועות',
+    desc: 'סמן "כן" ליד מקצועות המעניינים אותך או המושכים אותך. סמן "לא" ליד מקצועות שאינך מתעניין/ת בהם או שאינם מושכים אותך.',
+    pairs: [
+      {
+        left: { cat: 'R', items: [
+          'הנדסאי/ת חשמל',
+          'מכונאי/ת רכב',
+          'נגר/נגרית',
+          'מהנדס/ת מזון',
+          'הנדסאי/ת חומרה במחשבים',
+          'מהנדס/ת בניין',
+          'הנדסאי/ת טקסטיל',
+          'מהנדס/ת מכונות חקלאיות',
+          'טכנאי/ת אלקטרוניקה',
+          'שמאי/ת רכב',
+          'טכנאי/ת רדיו וטלוויזיה',
+          'טייס/ת מסוקים',
+          'מהנדס/ת יצור',
+          'מהנדס/ת אלקטרו אופטיקה'
+        ]},
+        right: { cat: 'S', items: [
+          'יועץ/ת בבחירת מקצוע',
+          'פיזיותרפיסט/פיזיותרפיסטית',
+          'מורה בחינוך מיוחד',
+          'מדריך/ת תיירים',
+          'קצין/ת מבחן נוער',
+          'מרפא/ה בדיבור',
+          'דיאטן/דיאטנית',
+          'פסיכולוג/פסיכולוגית קליני/ת',
+          'מרצה במדעי החברה',
+          'מרפא/ה בעיסוק',
+          'יועץ/ת חינוכי/ת',
+          'עובד/ת סוציאלי/ת',
+          'מנחה/ת קבוצות הורים',
+          'מנהל/ת מוסד חינוכי'
+        ]}
+      },
+      {
+        left: { cat: 'I', items: [
+          'חזאי/חזאית מזג אויר',
+          'ביולוג/ביולוגית',
+          'אגרונום/אגרונומית',
+          'מעבדנות (לבורנט/לבורנטית)',
+          'אנתרופולוג/אנתרופולוגית',
+          'כימאי/כימאית',
+          'חוקר/ת בתחום הבריאות',
+          'עורך/ת ירחון מדעי',
+          'גיאוגרף/גיאוגרפית',
+          'חוקר/ת בתחום הכלכלה',
+          'עובד/ת במחקר מדעי',
+          'מתמטיקאי/מתמטיקאית',
+          'חוקר/ת במדעי החברה',
+          'חוקר/ת במדעי הסביבה'
+        ]},
+        right: { cat: 'E', items: [
+          'קניין/קניינית סחורות',
+          'יועץ/ת ארגוני/ת',
+          'מסעדן/מסעדנית',
+          'מנהל/ת מחלקת שיווק',
+          'אמרגן/אמרגנית או מפיק/ה',
+          'איש/אשת מכירות',
+          'סוכן/ת נדל"ן',
+          'מנהל/ת חנות כל-בו',
+          'מנהל/ת מלון',
+          'איש/אשת יחסי ציבור',
+          'מנהל/ת תחנת טלוויזיה',
+          'בעל/ת עסק עצמאי',
+          'תועמלן/תועמלנית רפואי/ת',
+          'מנהל/ת מפעל'
+        ]}
+      },
+      {
+        left: { cat: 'A', items: [
+          'רעיונאי/ת (קופירייטר)',
+          'נגן/ת',
+          'סופר/ת',
+          'שחקן/שחקנית',
+          'מעצב/ת פנים',
+          'צלם/ת אופנה',
+          'כוריאוגרף/כוריאוגרפית',
+          'צייר/ת',
+          'זמר/ת',
+          'מלחין/ה',
+          'פסל/ת',
+          'מחזאי/מחזאית',
+          'גרפיקאי/ת',
+          'בדרן/בדרנית'
+        ]},
+        right: { cat: 'C', items: [
+          'מנהל/ת חשבונות',
+          'עורך/ת לשוני/ת',
+          'רואה/ת חשבון',
+          'חוקר/ת מס',
+          'בנקאי/ת',
+          'סוכן/ת ביטוח',
+          'מנהל/ת ארכיון',
+          'מפעיל/ת מחשב',
+          'מומחה/מומחית פיננסי/ת',
+          'תמחירן/תמחירנית',
+          'מזכיר/ה בכירה',
+          'סטטיסטיקאי/סטטיסטיקאית',
+          'מנהל/ת אגף במשרד ממשלתי',
+          'מומחה/מומחית לבקרת איכות'
+        ]}
+      }
+    ]
+  }
+};
+
+// ==================== STATE ====================
+let answers = {}; // key: "section-cat-index" => true/false/undefined
+let totalQuestions = 0;
+
+// ==================== BUILD UI ====================
+function buildQuestionnaire() {
+  const container = document.getElementById('questionnaireSections');
+  let html = '';
+  let sectionNum = 1;
+
+  for (const [sectionKey, section] of Object.entries(QUESTIONS)) {
+    html += `<div class="section">
+      <div class="section-title">${section.title} <span class="badge">חלק ${sectionNum}</span></div>
+      <div class="section-desc">${section.desc}</div>`;
+
+    section.pairs.forEach((pair, pairIdx) => {
+      html += `<div class="category-pair">`;
+      ['left', 'right'].forEach(side => {
+        const block = pair[side];
+        const cat = block.cat;
+        html += `<div class="category-block cat-${cat}">
+          <div class="category-header">
+            <span>${CATEGORIES[cat].name} (${cat})</span>
+            <span class="count" id="count-${sectionKey}-${cat}-${pairIdx}">0/${block.items.length}</span>
+          </div>
+          <div class="question-list">`;
+
+        block.items.forEach((item, itemIdx) => {
+          const qKey = `${sectionKey}-${cat}-${pairIdx}-${itemIdx}`;
+          totalQuestions++;
+          html += `<div class="question-item" id="qi-${qKey}">
+            <div class="q-toggle">
+              <button class="yes-btn" onclick="setAnswer('${qKey}', true, '${sectionKey}', '${cat}', ${pairIdx}, ${block.items.length})">כן</button>
+              <button class="no-btn" onclick="setAnswer('${qKey}', false, '${sectionKey}', '${cat}', ${pairIdx}, ${block.items.length})">לא</button>
+            </div>
+            <div class="q-text">${item}</div>
+          </div>`;
+        });
+
+        html += `</div></div>`;
+      });
+      html += `</div>`;
+    });
+
+    html += `</div>`;
+    sectionNum++;
+  }
+  container.innerHTML = html;
+
+  // Set exam date to today
+  document.getElementById('examDate').valueAsDate = new Date();
+}
+
+// ==================== ANSWER HANDLING ====================
+function setAnswer(qKey, value, sectionKey, cat, pairIdx, totalInBlock) {
+  answers[qKey] = value;
+
+  const qi = document.getElementById(`qi-${qKey}`);
+  qi.classList.toggle('selected', value === true);
+  qi.classList.toggle('not-selected', value === false);
+
+  const btns = qi.querySelectorAll('.q-toggle button');
+  btns[0].classList.toggle('active', value === true);
+  btns[1].classList.toggle('active', value === false);
+
+  // Update count
+  let yesCount = 0;
+  const prefix = `${sectionKey}-${cat}-${pairIdx}-`;
+  for (const [k, v] of Object.entries(answers)) {
+    if (k.startsWith(prefix) && v === true) yesCount++;
+  }
+  const countEl = document.getElementById(`count-${sectionKey}-${cat}-${pairIdx}`);
+  if (countEl) countEl.textContent = `${yesCount}/${totalInBlock}`;
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = Object.keys(answers).length;
+  const pct = Math.round((answered / totalQuestions) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${answered} מתוך ${totalQuestions} שאלות`;
+  document.getElementById('progressPercent').textContent = pct + '%';
+}
+
+// ==================== CALCULATE SCORES ====================
+function calculateScores() {
+  const scores = {};
+  const sectionScores = {};
+  const positiveAnswers = {};
+  const negativeAnswers = {};
+
+  for (const cat of Object.keys(CATEGORIES)) {
+    scores[cat] = 0;
+    sectionScores[cat] = { activities: 0, skills: 0, occupations: 0 };
+    positiveAnswers[cat] = { activities: [], skills: [], occupations: [] };
+    negativeAnswers[cat] = { activities: [], skills: [], occupations: [] };
+  }
+
+  for (const [sectionKey, section] of Object.entries(QUESTIONS)) {
+    section.pairs.forEach((pair, pairIdx) => {
+      ['left', 'right'].forEach(side => {
+        const block = pair[side];
+        const cat = block.cat;
+        block.items.forEach((item, itemIdx) => {
+          const qKey = `${sectionKey}-${cat}-${pairIdx}-${itemIdx}`;
+          if (answers[qKey] === true) {
+            scores[cat]++;
+            sectionScores[cat][sectionKey]++;
+            positiveAnswers[cat][sectionKey].push(item);
+          } else if (answers[qKey] === false) {
+            negativeAnswers[cat][sectionKey].push(item);
+          }
+        });
+      });
+    });
+  }
+
+  return { scores, sectionScores, positiveAnswers, negativeAnswers };
+}
+
+// ==================== SHOW RESULTS ====================
+let chartInstance = null;
+
+function showResults() {
+  const { scores, sectionScores, positiveAnswers, negativeAnswers } = calculateScores();
+
+  // User info
+  const name = document.getElementById('userName').value || 'לא צוין';
+  const id = document.getElementById('userId').value || 'לא צוין';
+  const dob = document.getElementById('userDob').value || '';
+  const examDate = document.getElementById('examDate').value || '';
+  document.getElementById('resultsUserInfo').textContent = `${name} | ת.ז. ${id} | תאריך בחינה: ${examDate}`;
+
+  // Build scores table
+  const catOrder = ['R', 'I', 'A', 'S', 'E', 'C'];
+  const sectionNames = { activities: 'פעילויות', skills: 'כשרים', occupations: 'מקצועות' };
+  let tableHtml = `<tr><th></th>`;
+  catOrder.forEach(c => {
+    tableHtml += `<th style="background:${CATEGORIES[c].color}">${CATEGORIES[c].name} ${c}</th>`;
+  });
+  tableHtml += `<th>סה"כ</th></tr>`;
+
+  for (const [secKey, secName] of Object.entries(sectionNames)) {
+    let rowTotal = 0;
+    tableHtml += `<tr><td class="row-label">${secName}</td>`;
+    catOrder.forEach(c => {
+      const val = sectionScores[c][secKey];
+      rowTotal += val;
+      tableHtml += `<td>${val}</td>`;
+    });
+    tableHtml += `<td><strong>${rowTotal}</strong></td></tr>`;
+  }
+
+  // Total row
+  let grandTotal = 0;
+  tableHtml += `<tr class="total-row"><td class="row-label">סה"כ</td>`;
+  catOrder.forEach(c => {
+    grandTotal += scores[c];
+    tableHtml += `<td><strong>${scores[c]}</strong></td>`;
+  });
+  tableHtml += `<td><strong>${grandTotal}</strong></td></tr>`;
+
+  document.getElementById('scoresTable').innerHTML = tableHtml;
+
+  // Build chart
+  if (chartInstance) chartInstance.destroy();
+  const ctx = document.getElementById('resultsChart').getContext('2d');
+  chartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: catOrder.map(c => `${CATEGORIES[c].name} (${c})`),
+      datasets: [{
+        label: 'ציון כולל',
+        data: catOrder.map(c => scores[c]),
+        backgroundColor: catOrder.map(c => CATEGORIES[c].color + 'cc'),
+        borderColor: catOrder.map(c => CATEGORIES[c].color),
+        borderWidth: 2,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => `ציון: ${ctx.parsed.y}`
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: Math.max(40, ...catOrder.map(c => scores[c]) ) + 2,
+          title: { display: true, text: 'ציון' }
+        }
+      }
+    }
+  });
+
+  // Build answer lists (positive and negative)
+  let listsHtml = '';
+
+  // Positive
+  listsHtml += `<div class="answer-list-block positive"><h4>תשובות חיוביות ("כן")</h4><div class="answer-list-content">`;
+  catOrder.forEach(c => {
+    const allPos = [];
+    for (const secKey of Object.keys(sectionNames)) {
+      positiveAnswers[c][secKey].forEach(item => allPos.push(item));
+    }
+    if (allPos.length > 0) {
+      listsHtml += `<div class="cat-group"><div class="cat-label" style="background:${CATEGORIES[c].color}22; color:${CATEGORIES[c].color}">${CATEGORIES[c].name} (${c}) — ${allPos.length}</div><ul>`;
+      allPos.forEach(item => { listsHtml += `<li>${item}</li>`; });
+      listsHtml += `</ul></div>`;
+    }
+  });
+  listsHtml += `</div></div>`;
+
+  // Negative
+  listsHtml += `<div class="answer-list-block negative"><h4>תשובות שליליות ("לא")</h4><div class="answer-list-content">`;
+  catOrder.forEach(c => {
+    const allNeg = [];
+    for (const secKey of Object.keys(sectionNames)) {
+      negativeAnswers[c][secKey].forEach(item => allNeg.push(item));
+    }
+    if (allNeg.length > 0) {
+      listsHtml += `<div class="cat-group"><div class="cat-label" style="background:${CATEGORIES[c].color}22; color:${CATEGORIES[c].color}">${CATEGORIES[c].name} (${c}) — ${allNeg.length}</div><ul>`;
+      allNeg.forEach(item => { listsHtml += `<li>${item}</li>`; });
+      listsHtml += `</ul></div>`;
+    }
+  });
+  listsHtml += `</div></div>`;
+
+  document.getElementById('answerLists').innerHTML = listsHtml;
+
+  // Show overlay
+  document.getElementById('resultsOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  saveSubmission(false).catch(err => console.error('Auto-save error:', err));
+}
+
+function closeResults() {
+  document.getElementById('resultsOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// ==================== SAVE ====================
+const SB_URL = 'https://ahomwnlimuxinttwrikr.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFob213bmxpbXV4aW50dHdyaWtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NjI5MTUsImV4cCI6MjA4OTIzODkxNX0.B5y9pilGpPM2xxkC30nZfJhUKOPFI8ELSZjbYF5HNeM';
+let lastSavedSig = null;
+
+async function saveSubmission(force) {
+  const { scores, sectionScores, positiveAnswers, negativeAnswers } = calculateScores();
+  const payload = {
+    name: document.getElementById('userName').value || 'לא צוין',
+    id_number: document.getElementById('userId').value || 'לא צוין',
+    date_of_birth: document.getElementById('userDob').value || '',
+    exam_date: document.getElementById('examDate').value || '',
+    scores, section_scores: sectionScores, answers,
+    positive_answers: positiveAnswers, negative_answers: negativeAnswers
+  };
+  const sig = JSON.stringify(payload);
+  if (!force && sig === lastSavedSig) return true;
+  const response = await fetch(SB_URL + '/rest/v1/holland_submissions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, Prefer: 'return=minimal' },
+    body: sig
+  });
+  if (!response.ok) throw new Error('שגיאה בשמירה (' + response.status + ')');
+  lastSavedSig = sig;
+  return true;
+}
+
+async function sendEmail() {
+  const statusEl = document.getElementById('sendStatus');
+  statusEl.className = 'send-status loading';
+  statusEl.textContent = 'שולח את התוצאות...';
+  try {
+    await saveSubmission(false);
+    statusEl.className = 'send-status success';
+    statusEl.textContent = 'התוצאות נשלחו ונשמרו בהצלחה!';
+    setTimeout(() => { statusEl.className = 'send-status'; statusEl.textContent = ''; }, 5000);
+  } catch (err) {
+    console.error('Save error:', err);
+    statusEl.className = 'send-status error';
+    statusEl.textContent = 'שגיאה בשליחה: ' + (err.message || 'נסה שוב');
+  }
+}
+
+// ==================== ADMIN BAR ====================
+function toggleAdmin() {
+  const bar = document.getElementById('adminBar');
+  const isHidden = bar.style.maxHeight === '0px';
+  if (isHidden) {
+    bar.style.maxHeight = '';
+    bar.style.padding = '';
+    bar.style.overflow = '';
+  } else {
+    bar.style.maxHeight = '0px';
+    bar.style.padding = '0 24px';
+    bar.style.overflow = 'hidden';
+  }
+}
+
+// ==================== INIT ====================
+buildQuestionnaire();
+updateProgress();
+</script>
+</body>
+</html>
