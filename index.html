@@ -1112,7 +1112,6 @@ function closeResults() {
 // ==================== SAVE ====================
 const SB_URL = 'https://ahomwnlimuxinttwrikr.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFob213bmxpbXV4aW50dHdyaWtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NjI5MTUsImV4cCI6MjA4OTIzODkxNX0.B5y9pilGpPM2xxkC30nZfJhUKOPFI8ELSZjbYF5HNeM';
-const NOTIFY_EMAIL = 'joshuaguedalia@gmail.com';
 let lastSavedSig = null;
 
 async function saveSubmission(force) {
@@ -1134,29 +1133,9 @@ async function saveSubmission(force) {
   });
   if (!response.ok) throw new Error('שגיאה בשמירה (' + response.status + ')');
   lastSavedSig = sig;
-  notifyAdmin(payload).catch(err => console.error('Notify error:', err));
   return true;
 }
 
-async function notifyAdmin(p) {
-  const code = Object.entries(p.scores).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]).join('');
-  const scoreLine = ['R', 'I', 'A', 'S', 'E', 'C'].map(c => `${c}: ${p.scores[c]}`).join(' | ');
-  await fetch('https://formsubmit.co/ajax/' + NOTIFY_EMAIL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({
-      _subject: `שאלון הולנד – תוצאה חדשה: ${p.name} (${code})`,
-      _template: 'table',
-      _captcha: 'false',
-      'שם': p.name,
-      'תאריך בחינה': p.exam_date,
-      'קוד הולנד': code,
-      'ציונים': scoreLine,
-      'נענו': Object.keys(p.answers).length + ' מתוך ' + totalQuestions,
-      'צפייה בכל התוצאות': 'https://guedalia.github.io/holland/admin.html'
-    })
-  });
-}
 
 async function sendEmail() {
   const statusEl = document.getElementById('sendStatus');
